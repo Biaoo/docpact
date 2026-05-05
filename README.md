@@ -30,7 +30,7 @@ A PR changes `src/api/client.ts`. `docpact` maps that change to `README.md`
 and `docs/api.md`, fails CI, then passes after the docs are updated or explicit
 review evidence is recorded.
 
-https://github.com/user-attachments/assets/2e141b67-e58a-4a1f-bb23-61d89d9d60af
+https://github.com/user-attachments/assets/c1e58989-819b-4a29-aacb-277672fdfae3
 
 The demo starts from one `.docpact/config.yaml` rule:
 
@@ -84,9 +84,9 @@ docpact lint --root . --staged --mode enforce
 ## GitHub Actions
 
 ```yaml
-- uses: Biaoo/docpact@v0.1.8
+- uses: Biaoo/docpact@v0.1.9
   with:
-    version: 0.1.8
+    version: 0.1.9
     args: >
       lint
       --root .
