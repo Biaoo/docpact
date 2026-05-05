@@ -1,3 +1,9 @@
+//! Implementation of read-only derived render views.
+//!
+//! Render exposes compact summaries over configured catalog, ownership,
+//! routing, navigation, and workspace context without creating a new source of
+//! truth.
+
 use std::collections::BTreeSet;
 
 use miette::{Result, bail};

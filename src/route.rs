@@ -1,3 +1,8 @@
+//! Implementation of `docpact route`.
+//!
+//! Route recommends governed and advisory documents to read before coding,
+//! using paths, module scopes, or controlled intents as deterministic inputs.
+
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;

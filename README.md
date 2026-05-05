@@ -1,42 +1,18 @@
 # docpact
 
-`docpact` is a standalone Rust CLI for deterministic, diff-driven documentation governance.
+[![crates.io](https://img.shields.io/crates/v/docpact.svg)](https://crates.io/crates/docpact)
+[![docs.rs](https://docs.rs/docpact/badge.svg)](https://docs.rs/docpact)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![test](https://github.com/Biaoo/docpact/actions/workflows/test.yml/badge.svg)](https://github.com/Biaoo/docpact/actions/workflows/test.yml)
+[![release](https://github.com/Biaoo/docpact/actions/workflows/release.yml/badge.svg)](https://github.com/Biaoo/docpact/actions/workflows/release.yml)
 
-It helps teams and agents answer three practical questions:
+Changed `src/api/client.ts`?
 
-- before coding: what documents should I read first?
-- after coding: what documentation should this change have reviewed or updated?
-- ongoing: which governed documents have gone stale?
+`docpact` tells CI that `README.md` and `docs/api.md` must be reviewed or updated before the change can merge.
 
-`docpact` stays deterministic. It does not replace governance decisions with AI inference, and it does not hide state in background services or opaque caches.
-
-License: [MIT](./LICENSE)
-
-## Why docpact
-
-AI coding tools make code changes cheaper. They also make documentation drift cheaper.
-
-In agentic coding workflows, that usually breaks down in three places:
-
-- before coding: an agent does not know which documents it should read first, so it either loads too much, relies on coarse pointers, or skips discovery entirely
-- after coding: an agent does not know which documents should have been reviewed or updated as a consequence of the change
-- ongoing: an agent treats documentation as authoritative input, but has no built-in signal for whether that documentation has silently gone stale
-
-`docpact` closes that loop:
-
-- `route` helps decide what to read before coding
-- `lint` enforces which governed docs should have been reviewed or updated after coding
-- `freshness` detects governed docs that may no longer be trustworthy
-- `render` exposes short, read-only summaries over catalog, ownership, navigation, and workspace context
-
-Public design principles:
-
-- [docs/design-principles.md](./docs/design-principles.md)
-- [docs/modeling-boundary.md](./docs/modeling-boundary.md)
+`docpact` is a standalone Rust CLI for deterministic, diff-driven documentation governance in AI-assisted software teams. It does not generate documentation and it does not ask an LLM to decide whether docs are stale. Repositories declare documentation obligations in config; `docpact` enforces those obligations from an explicit diff.
 
 ## Install
-
-Install from crates.io:
 
 ```bash
 cargo install docpact
@@ -48,11 +24,96 @@ Run from source:
 cargo run -- <command>
 ```
 
-Install from a local checkout:
+## 30-second demo
+
+<video src="./assets/docpact-promotion-demo.mp4" controls muted playsinline></video>
+
+[Watch the demo video](./assets/docpact-promotion-demo.mp4)
+
+Start with a `.docpact/config.yaml` rule:
+
+```yaml
+version: 1
+layout: repo
+repo:
+  id: sample-sdk
+  owner: sample-sdk
+rules:
+  - id: api-surface
+    scope: repo
+    repo: sample-sdk
+    triggers:
+      - path: src/api/**
+        kind: code
+    requiredDocs:
+      - path: README.md
+        mode: review_or_update
+      - path: docs/api.md
+        mode: review_or_update
+    reason: API changes must refresh the public contract and docs.
+```
+
+Run `lint` against a concrete diff:
 
 ```bash
-cargo install --path .
+docpact lint --root . --files src/api/client.ts --mode enforce
 ```
+
+Example output:
+
+```text
+Docpact lint: blocking problems found.
+Summary: total=2, active=2, suppressed_by_baseline=0, waived=0, coverage=ok, uncovered=0, freshness=ok, stale_docs=0, critical_stale_docs=0, invalid_review_references=2, page=1/1
+Problem types: missing-review=2
+Top rules: api-surface=2
+- [d001] missing-review: README.md via rule api-surface; action: touch_required_doc; reason: required_doc_not_touched; mode: review_or_update
+- [d002] missing-review: docs/api.md via rule api-surface; action: touch_required_doc; reason: required_doc_not_touched; mode: review_or_update
+Next: run `docpact diagnostics show --report <artifact> --id d001` for full context, then apply the suggested action.
+```
+
+Handle the obligation by updating the docs or recording explicit review evidence:
+
+```bash
+docpact review mark --root . --path README.md
+git add README.md docs/api.md
+docpact lint --root . --staged --mode enforce
+```
+
+## GitHub Actions
+
+```yaml
+- uses: Biaoo/docpact@v0.1.5
+  with:
+    version: 0.1.5
+    args: >
+      lint
+      --root .
+      --base ${{ github.event.pull_request.base.sha }}
+      --head ${{ github.sha }}
+      --mode enforce
+```
+
+Reference workflows:
+
+- [examples/github-actions/pr-lint.yml](./examples/github-actions/pr-lint.yml)
+- [examples/github-actions/pr-lint-with-adoption-controls.yml](./examples/github-actions/pr-lint-with-adoption-controls.yml)
+- [examples/github-actions/coverage-audit.yml](./examples/github-actions/coverage-audit.yml)
+- [examples/github-actions/freshness-audit.yml](./examples/github-actions/freshness-audit.yml)
+
+## What docpact answers
+
+It helps teams and agents answer three practical questions:
+
+- before coding: what documents should I read first?
+- after coding: what documentation should this change have reviewed or updated?
+- ongoing: which governed documents have gone stale?
+
+`docpact` closes that loop with deterministic commands:
+
+- `route` helps decide what to read before coding
+- `lint` enforces which governed docs should have been reviewed or updated after coding
+- `freshness` detects governed docs that may no longer be trustworthy
+- `render` exposes short, read-only summaries over catalog, ownership, navigation, and workspace context
 
 ## Quick Start
 
@@ -63,8 +124,6 @@ cargo install --path .
 2. Copy the right shape into the target repository as `.docpact/config.yaml`.
 3. Validate the config.
 4. Run `lint` against an explicit diff source.
-
-Example:
 
 ```bash
 docpact validate-config --root /path/to/repo
@@ -80,6 +139,23 @@ docpact lint --root /path/to/repo --files src/api/client.ts,README.md --format t
 - `--worktree`
 - `--merge-base <ref>`
 - `--base <sha> --head <sha>`
+
+## Why docpact
+
+AI coding tools make code changes cheaper. They also make documentation drift cheaper.
+
+In agentic coding workflows, that usually breaks down in three places:
+
+- before coding: an agent does not know which documents it should read first, so it either loads too much, relies on coarse pointers, or skips discovery entirely
+- after coding: an agent does not know which documents should have been reviewed or updated as a consequence of the change
+- ongoing: an agent treats documentation as authoritative input, but has no built-in signal for whether that documentation has silently gone stale
+
+`docpact` stays deterministic. It does not replace governance decisions with AI inference, and it does not hide state in background services or opaque caches.
+
+Public design principles:
+
+- [docs/design-principles.md](./docs/design-principles.md)
+- [docs/modeling-boundary.md](./docs/modeling-boundary.md)
 
 ## Core Commands
 
@@ -201,32 +277,7 @@ docpact lint --root /path/to/repo --files src/api/client.ts,README.md --waivers 
 
 Use waivers sparingly. They are temporary, explicit exceptions, not a default suppression path.
 
-## GitHub Actions
-
-This repository ships a thin official GitHub Action wrapper in [action.yml](./action.yml).
-
-Typical usage:
-
-```yaml
-- uses: <org>/docpact@v1
-  with:
-    version: 0.1.4
-    args: >
-      lint
-      --root .
-      --base ${{ github.event.pull_request.base.sha }}
-      --head ${{ github.sha }}
-      --mode enforce
-```
-
-Reference workflows:
-
-- [examples/github-actions/pr-lint.yml](./examples/github-actions/pr-lint.yml)
-- [examples/github-actions/pr-lint-with-adoption-controls.yml](./examples/github-actions/pr-lint-with-adoption-controls.yml)
-- [examples/github-actions/coverage-audit.yml](./examples/github-actions/coverage-audit.yml)
-- [examples/github-actions/freshness-audit.yml](./examples/github-actions/freshness-audit.yml)
-
-Repository CI workflows:
+## Repository CI Workflows
 
 - [test.yml](./.github/workflows/test.yml): minimal PR and default-branch test CI
 - [release.yml](./.github/workflows/release.yml): tag-driven crates.io publish and GitHub Release

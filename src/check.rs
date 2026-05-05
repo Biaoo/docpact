@@ -1,3 +1,9 @@
+//! Implementation of `docpact lint`.
+//!
+//! Lint evaluates an explicit diff source against configured documentation
+//! rules, writes a diagnostics artifact, and returns an exit status suitable for
+//! CI gates.
+
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::path::Path;
 

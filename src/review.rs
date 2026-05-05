@@ -1,3 +1,8 @@
+//! Implementation of `docpact review`.
+//!
+//! Review commands record explicit review evidence in supported documentation
+//! metadata formats.
+
 use std::collections::HashSet;
 use std::fs;
 use std::path::Path;

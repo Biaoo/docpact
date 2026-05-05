@@ -1,3 +1,8 @@
+//! CLI argument definitions for the `docpact` binary.
+//!
+//! This module maps command-line flags into typed command structs. Command
+//! implementations live in their corresponding modules.
+
 use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand, ValueEnum};

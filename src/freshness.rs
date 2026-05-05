@@ -1,3 +1,8 @@
+//! Implementation of document freshness checks.
+//!
+//! Freshness evaluates review metadata and git history to identify governed
+//! documents that may no longer be trustworthy.
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::Path;

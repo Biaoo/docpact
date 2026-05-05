@@ -1,3 +1,8 @@
+//! Implementation of governance coverage audits.
+//!
+//! Coverage reports which tracked paths are governed by rules and which
+//! inventoried documents are reachable through configuration.
+
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::path::Path;
 
