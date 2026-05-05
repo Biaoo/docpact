@@ -26,9 +26,9 @@ cargo run -- <command>
 
 ## 30-second demo
 
-<video src="./assets/docpact-promotion-demo.mp4" controls muted playsinline></video>
+[![docpact 30-second demo](./assets/docpact-promotion-demo-poster.jpeg)](./assets/docpact-promotion-demo.mp4)
 
-[Watch the demo video](./assets/docpact-promotion-demo.mp4)
+[Watch the 30-second demo video](./assets/docpact-promotion-demo.mp4)
 
 Start with a `.docpact/config.yaml` rule:
 
@@ -82,9 +82,9 @@ docpact lint --root . --staged --mode enforce
 ## GitHub Actions
 
 ```yaml
-- uses: Biaoo/docpact@v0.1.5
+- uses: Biaoo/docpact@v0.1.6
   with:
-    version: 0.1.5
+    version: 0.1.6
     args: >
       lint
       --root .
