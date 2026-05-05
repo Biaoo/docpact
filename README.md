@@ -24,13 +24,15 @@ Run from source:
 cargo run -- <command>
 ```
 
-## 30-second demo
+## Demo: catch stale docs in CI
+
+A PR changes `src/api/client.ts`. `docpact` maps that change to `README.md`
+and `docs/api.md`, fails CI, then passes after the docs are updated or explicit
+review evidence is recorded.
 
 https://github.com/user-attachments/assets/2e141b67-e58a-4a1f-bb23-61d89d9d60af
 
-[Download the demo MP4](https://github.com/Biaoo/docpact/raw/main/assets/docpact-promotion-demo.mp4)
-
-Start with a `.docpact/config.yaml` rule:
+The demo starts from one `.docpact/config.yaml` rule:
 
 ```yaml
 version: 1
@@ -53,7 +55,7 @@ rules:
     reason: API changes must refresh the public contract and docs.
 ```
 
-Run `lint` against a concrete diff:
+Run `lint` against the PR diff:
 
 ```bash
 docpact lint --root . --files src/api/client.ts --mode enforce
@@ -82,9 +84,9 @@ docpact lint --root . --staged --mode enforce
 ## GitHub Actions
 
 ```yaml
-- uses: Biaoo/docpact@v0.1.7
+- uses: Biaoo/docpact@v0.1.8
   with:
-    version: 0.1.7
+    version: 0.1.8
     args: >
       lint
       --root .

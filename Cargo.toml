@@ -1,6 +1,6 @@
 [package]
 name = "docpact"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2024"
 description = "Deterministic documentation governance CLI for AI-assisted software teams."
 license = "MIT"
@@ -8,6 +8,7 @@ readme = "README.md"
 documentation = "https://docs.rs/docpact"
 keywords = ["documentation", "governance", "lint", "cli", "agent"]
 categories = ["command-line-utilities", "development-tools"]
+exclude = ["/assets"]
 
 [dependencies]
 clap = { version = "4.5.53", features = ["derive"] }
